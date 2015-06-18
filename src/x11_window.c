@@ -253,7 +253,7 @@ static GLboolean createWindow(_GLFWwindow* window,
 {
     unsigned long wamask;
     XSetWindowAttributes wa;
-    XVisualInfo* vi = _GLFW_X11_CONTEXT_VISUAL;
+    Visual* visual = DefaultVisual(_glfw.x11.display, _glfw.x11.screen);
 
     // Every window needs a colormap
     // Create one based on the visual used by the current context
@@ -261,7 +261,7 @@ static GLboolean createWindow(_GLFWwindow* window,
 
     window->x11.colormap = XCreateColormap(_glfw.x11.display,
                                            _glfw.x11.root,
-                                           vi->visual,
+                                           visual,
                                            AllocNone);
 
     // Create the actual window
@@ -282,9 +282,10 @@ static GLboolean createWindow(_GLFWwindow* window,
                                            0, 0,
                                            wndconfig->width, wndconfig->height,
                                            0,          // Border width
-                                           vi->depth,  // Color depth
+                                           DefaultDepth(_glfw.x11.display,
+                                                        _glfw.x11.screen),  // Color depth
                                            InputOutput,
-                                           vi->visual,
+                                           visual,
                                            wamask,
                                            &wa);
 
@@ -1415,11 +1416,14 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
                               const _GLFWctxconfig* ctxconfig,
                               const _GLFWfbconfig* fbconfig)
 {
-    if (!_glfwCreateContext(window, ctxconfig, fbconfig))
-        return GL_FALSE;
-
     if (!createWindow(window, wndconfig))
         return GL_FALSE;
+
+    if (ctxconfig->api != GLFW_NO_API)
+    {
+        if (!_glfwCreateContext(window, ctxconfig, fbconfig))
+            return GL_FALSE;
+    }
 
     if (wndconfig->monitor)
     {
@@ -1441,7 +1445,8 @@ void _glfwPlatformDestroyWindow(_GLFWwindow* window)
         window->x11.ic = NULL;
     }
 
-    _glfwDestroyContext(window);
+    if (window->context.api != GLFW_NO_API)
+        _glfwDestroyContext(window);
 
     if (window->x11.handle)
     {

@@ -50,10 +50,7 @@ typedef int (*PFNGLXSWAPINTERVALMESAPROC)(int);
 //
 typedef struct _GLFWcontextGLX
 {
-    // Rendering context
     GLXContext      context;
-    // Visual of selected GLXFBConfig
-    XVisualInfo*    visual;
 
 } _GLFWcontextGLX;
 

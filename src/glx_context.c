@@ -79,10 +79,6 @@ static GLboolean chooseFBConfig(const _GLFWfbconfig* desired, GLXFBConfig* resul
         const GLXFBConfig n = nativeConfigs[i];
         _GLFWfbconfig* u = usableConfigs + usableCount;
 
-        // Only consider GLXFBConfigs with associated visuals
-        if (!getFBConfigAttrib(n, GLX_VISUAL_ID))
-            continue;
-
         // Only consider RGBA GLXFBConfigs
         if (!(getFBConfigAttrib(n, GLX_RENDER_TYPE) & GLX_RGBA_BIT))
             continue;
@@ -293,14 +289,6 @@ int _glfwCreateContext(_GLFWwindow* window,
         return GL_FALSE;
     }
 
-    window->glx.visual = glXGetVisualFromFBConfig(_glfw.x11.display, native);
-    if (!window->glx.visual)
-    {
-        _glfwInputError(GLFW_PLATFORM_ERROR,
-                        "GLX: Failed to retrieve visual for GLXFBConfig");
-        return GL_FALSE;
-    }
-
     if (ctxconfig->api == GLFW_OPENGL_ES_API)
     {
         if (!_glfw.glx.ARB_create_context ||
@@ -451,12 +439,6 @@ int _glfwCreateContext(_GLFWwindow* window,
 //
 void _glfwDestroyContext(_GLFWwindow* window)
 {
-    if (window->glx.visual)
-    {
-        XFree(window->glx.visual);
-        window->glx.visual = NULL;
-    }
-
     if (window->glx.context)
     {
         glXDestroyContext(_glfw.x11.display, window->glx.context);

@@ -86,7 +86,8 @@ static GLboolean parseVersionString(int* api, int* major, int* minor, int* rev)
 
 GLboolean _glfwIsValidContextConfig(const _GLFWctxconfig* ctxconfig)
 {
-    if (ctxconfig->api != GLFW_OPENGL_API &&
+    if (ctxconfig->api != GLFW_NO_API &&
+        ctxconfig->api != GLFW_OPENGL_API &&
         ctxconfig->api != GLFW_OPENGL_ES_API)
     {
         _glfwInputError(GLFW_INVALID_ENUM, "Invalid client API");
@@ -524,7 +525,15 @@ int _glfwStringInExtensionString(const char* string, const GLubyte* extensions)
 GLFWAPI void glfwMakeContextCurrent(GLFWwindow* handle)
 {
     _GLFWwindow* window = (_GLFWwindow*) handle;
+
     _GLFW_REQUIRE_INIT();
+
+    if (window->context.api == GLFW_NO_API)
+    {
+        _glfwInputError(GLFW_NO_CONTEXT, NULL);
+        return;
+    }
+
     _glfwPlatformMakeContextCurrent(window);
 }
 
@@ -537,7 +546,15 @@ GLFWAPI GLFWwindow* glfwGetCurrentContext(void)
 GLFWAPI void glfwSwapBuffers(GLFWwindow* handle)
 {
     _GLFWwindow* window = (_GLFWwindow*) handle;
+
     _GLFW_REQUIRE_INIT();
+
+    if (window->context.api == GLFW_NO_API)
+    {
+        _glfwInputError(GLFW_NO_CONTEXT, NULL);
+        return;
+    }
+
     _glfwPlatformSwapBuffers(window);
 }
 

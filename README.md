@@ -62,6 +62,7 @@ GLFW bundles a number of dependencies in the `deps/` directory.
 
 ## Changelog
 
+ - Added `GLFW_NO_API`
  - Changed minimum required CMake version to 2.8.12
  - Bugfix: Initialization failed on headless systems
  - Bugfix: The cached current context could get out of sync
