@@ -11,6 +11,7 @@
 //========================================================================
 
 #define GLFW_INCLUDE_GLU
+#define GLFW_INCLUDE_GLEXT
 #include <GLFW/glfw3.h>
 
 #include <math.h>
@@ -383,6 +384,17 @@ static void windowRefreshFun(GLFWwindow* window)
 
 static void cursorPosFun(GLFWwindow* window, double x, double y)
 {
+    int wnd_width, wnd_height, fb_width, fb_height;
+    double scale;
+
+    glfwGetWindowSize(window, &wnd_width, &wnd_height);
+    glfwGetFramebufferSize(window, &fb_width, &fb_height);
+
+    scale = (double) fb_width / (double) wnd_width;
+
+    x *= scale;
+    y *= scale;
+
     // Depending on which view was selected, rotate around different axes
     switch (active_view)
     {
@@ -458,6 +470,8 @@ int main(void)
         exit(EXIT_FAILURE);
     }
 
+    glfwWindowHint(GLFW_SAMPLES, 4);
+
     // Open OpenGL window
     window = glfwCreateWindow(500, 500, "Split view demo", NULL, NULL);
     if (!window)
@@ -478,6 +492,13 @@ int main(void)
     // Enable vsync
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
+
+    if (glfwExtensionSupported("GL_ARB_multisample") ||
+        glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR) >= 2 ||
+        glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR) >= 3)
+    {
+        glEnable(GL_MULTISAMPLE_ARB);
+    }
 
     glfwGetFramebufferSize(window, &width, &height);
     framebufferSizeFun(window, width, height);
