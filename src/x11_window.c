@@ -869,13 +869,10 @@ static void processEvent(XEvent *event)
 
             if (window->x11.ic)
             {
-                int i;
-                Status status;
-                wchar_t buffer[16];
-
-                if (filtered)
+                // HACK: Ignore key press events intended solely for XIM
+                if (window->x11.last.keycode != event->xkey.keycode ||
+                    window->x11.last.time != event->xkey.time)
                 {
-                    // HACK: Ignore key press events intended solely for XIM
                     if (event->xkey.keycode)
                     {
                         _glfwInputKey(window,
@@ -883,8 +880,16 @@ static void processEvent(XEvent *event)
                                       GLFW_PRESS, mods);
                     }
                 }
-                else
+
+                window->x11.last.keycode = event->xkey.keycode;
+                window->x11.last.time = event->xkey.time;
+
+                if (!filtered)
                 {
+                    int i;
+                    Status status;
+                    wchar_t buffer[16];
+
                     const int count = XwcLookupString(window->x11.ic,
                                                       &event->xkey,
                                                       buffer, sizeof(buffer),
